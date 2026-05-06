@@ -1,26 +1,106 @@
-import { useState } from 'react';
-import SearchBar from './components/SearchBar';
-import FoodList from './components/FoodList';
+﻿import { useState } from "react";
+import SearchBar from "./components/SearchBar";
+import FoodList from "./components/FoodList";
 
 export default function App() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const getMockData = (query) => {
+    const mockProducts = {
+      milk: [
+        {
+          code: '001',
+          product_name: 'Whole Milk',
+          brands: 'Organic Farm',
+          image_small_url: 'https://via.placeholder.com/150?text=Milk',
+          nutriments: {
+            'energy-kcal_100g': 64,
+            proteins_100g: 3.2,
+            carbohydrates_100g: 4.8,
+            fat_100g: 3.6
+          }
+        },
+        {
+          code: '002',
+          product_name: 'Low Fat Milk',
+          brands: 'Dairy Gold',
+          image_small_url: 'https://via.placeholder.com/150?text=LowFatMilk',
+          nutriments: {
+            'energy-kcal_100g': 49,
+            proteins_100g: 3.3,
+            carbohydrates_100g: 4.7,
+            fat_100g: 1.5
+          }
+        }
+      ],
+      banana: [
+        {
+          code: '003',
+          product_name: 'Fresh Banana',
+          brands: 'Tropical Fresh',
+          image_small_url: 'https://via.placeholder.com/150?text=Banana',
+          nutriments: {
+            'energy-kcal_100g': 89,
+            proteins_100g: 1.1,
+            carbohydrates_100g: 23,
+            fat_100g: 0.3
+          }
+        }
+      ],
+      apple: [
+        {
+          code: '004',
+          product_name: 'Red Apple',
+          brands: 'Farm Fresh',
+          image_small_url: 'https://via.placeholder.com/150?text=Apple',
+          nutriments: {
+            'energy-kcal_100g': 52,
+            proteins_100g: 0.3,
+            carbohydrates_100g: 14,
+            fat_100g: 0.2
+          }
+        }
+      ]
+    };
+    
+    const lowerQuery = query.toLowerCase();
+    return mockProducts[lowerQuery] || [];
+  };
+
   const handleSearch = async (query) => {
     setLoading(true);
     try {
-      const encodedQuery = encodeURIComponent(query);
-      const response = await fetch(
-        `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodedQuery}&search_simple=1&action=process&format=json&pagesize=20`
-      );
-      const data = await response.json();
+      // Use mock data for demonstration
+      const mockResults = getMockData(query);
       
-      // Filter products to only include those with product_name
-      const filteredProducts = data.products.filter(
-        (p) => p.product_name && p.product_name.trim() !== ''
-      );
-      
-      setResults(filteredProducts);
+      if (mockResults.length > 0) {
+        setResults(mockResults);
+      } else {
+        // Try real API if mock doesn't have the data
+        const encodedQuery = encodeURIComponent(query);
+        const apiUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodedQuery}&search_simple=1&action=process&format=json&pagesize=20`;
+        
+        try {
+          const response = await fetch(apiUrl, {
+            mode: 'cors',
+            credentials: 'omit'
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const filteredProducts = (data.products || []).filter(
+              (p) => p.product_name && p.product_name.trim() !== ''
+            );
+            setResults(filteredProducts);
+          } else {
+            setResults([]);
+          }
+        } catch (apiError) {
+          console.log('Real API unavailable, showing mock data or empty results');
+          setResults([]);
+        }
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
       setResults([]);
@@ -52,94 +132,3 @@ export default function App() {
     </div>
   );
 }
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
-}
-
-export default App
